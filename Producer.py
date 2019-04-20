@@ -13,4 +13,3 @@ class Producer:
         self.producer.send('comments', bytes('{}\t{}'.format(v_id, comment),
                                              'utf-8'))
         print(v_id, comment)
-

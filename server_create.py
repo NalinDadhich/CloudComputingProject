@@ -1,12 +1,13 @@
 from threading import Thread
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
+
 class Wrapper:
     def __init__(self):
         print("Hello")
 
-class Server:
 
+class Server:
     def __init__(self):
         self.thread = None
         self.server = None
