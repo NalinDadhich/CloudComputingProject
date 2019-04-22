@@ -3,8 +3,9 @@ sys.path.insert(0, "/Users/nalindadhich/Documents/4th_semester/CloudComputing/Re
 from kafka import KafkaProducer
 from YT_Class import ExtractYouTube
 
+
 class Producer:
-    def __init__ (self, key, query, total_count):
+    def __init__ (self, total_count, query, key):
         self.yt_class = ExtractYouTube(total_count, query, key,
                                        self.receive_comment)
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
@@ -13,3 +14,9 @@ class Producer:
         self.producer.send('comments', bytes('{}\t{}'.format(v_id, comment),
                                              'utf-8'))
         print(v_id, comment)
+
+
+    def start(self):
+        self.yt_class.get_all_vids()
+        print('Video Ids:', self.yt_class.video_ids)
+        self.yt_class.start()

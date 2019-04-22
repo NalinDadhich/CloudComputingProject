@@ -4,7 +4,7 @@ from kafka import KafkaConsumer
 
 class Consumer:
     def __init__(self, received_info):
-        self.consumer = KafkaConsumer()
+        self.consumer = KafkaConsumer('my_consumer')
         self.thread = Thread(target=self.send_to_all)
         self.received_info = received_info
 
