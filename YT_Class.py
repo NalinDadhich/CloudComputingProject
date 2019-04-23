@@ -22,6 +22,7 @@ class ExtractYouTube(Thread):
         params = {
             'key': self.key,
             'part': 'snippet',
+            'chart': 'mostPopular',
             'maxResults': self.total_count,
             'order': 'date',
             'type': 'video',
@@ -32,7 +33,6 @@ class ExtractYouTube(Thread):
             params['regionCode'] = self.rcode
 
         extracted_jsons = requests.get(self.Search_Url, params).json()
-        # print(extracted_jsons)
 
         if not extracted_jsons['items']:
             raise ValueError(extracted_jsons)

@@ -13,8 +13,6 @@ class Producer:
     def receive_comment(self, v_id, comment):
         self.producer.send('comments', bytes('{}\t{}'.format(v_id, comment),
                                              'utf-8'))
-        print(v_id, comment)
-
 
     def start(self):
         self.yt_class.get_all_vids()
