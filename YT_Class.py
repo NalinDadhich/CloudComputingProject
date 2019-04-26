@@ -11,7 +11,7 @@ class ExtractYouTube(Thread):
         Thread.__init__(self)
         self.key = key
         self.query = query
-        self.total_count = 50 if total_count > 50 else total_count
+        self.total_count = 10 if total_count > 10 else total_count
         self.callback = call
         self.rcode = rcode
         self.interval = interval
@@ -34,6 +34,7 @@ class ExtractYouTube(Thread):
 
         extracted_jsons = requests.get(self.Search_Url, params).json()
 
+        print(extracted_jsons)
         if not extracted_jsons['items']:
             raise ValueError(extracted_jsons)
 

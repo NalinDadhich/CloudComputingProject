@@ -11,7 +11,15 @@ from nltk.stem import PorterStemmer
 from nltk import WordNetLemmatizer
 from kafka import KafkaProducer
 from nltk.corpus import stopwords
-import matplotlib as plt
+import matplotlib.pyplot as plt
+import json
+from collections import OrderedDict
+
+time_stamps = []
+all_v_id = []
+v_id_positive = OrderedDict()
+v_id_neutral = OrderedDict()
+v_id_negative = OrderedDict()
 
 class CommentAnalysis:
     def __init__(self):
@@ -28,9 +36,6 @@ class CommentAnalysis:
     def perform_sentiment_analysis(self, record):
         # print(record)
         sentiment = self.find_sentiment(record[1])
-        print("andarrrrrrrrrrrrrrrrr")
-        print(record)
-        print(sentiment)
         video_id = record[0]
 
         exists = os.path.isfile('stats.pickle')
@@ -39,7 +44,7 @@ class CommentAnalysis:
             vote_count = pkl.load(pkl_in)
             pkl_in.close()
         else:
-            vote_count = {}
+            vote_count = OrderedDict()
 
         if video_id not in vote_count:
             vote_count[video_id] = {}
@@ -48,53 +53,83 @@ class CommentAnalysis:
             vote_count[video_id]["negative"] = 0
 
         if sentiment['compound'] >= 0.05:
-            vote_count[video_id]["positive"] = vote_count[video_id][
-                                                   "positive"] + 1
+            vote_count[video_id]["positive"] += 1
 
         elif sentiment['compound'] >= -0.05:
-            vote_count[video_id]["neutral"] = vote_count[video_id][
-                                                   "neutral"] + 1
+            vote_count[video_id]["neutral"] += 1
         else:
-            vote_count[video_id]["negative"] = vote_count[video_id][
-                                                   "negative"] + 1
-        print(vote_count)
-
-        all_ids = [id for id in vote_count.keys()]
-        # all_pos_perct = [float(100*vote_count[idt]["positive"]/(vote_count
-        #             vote_count[idt]["positive"] + vote_count[idt]["negative"]))
-        # for idt in vote_count.keys()]
-
-        all_pos_percent = [100*float(vote_count[idt]["positive"]/(vote_count[
-            idt]["positive"] + vote_count[idt]["negative"])) for idt in
-                           vote_count.keys()]
-
-        print(all_ids)
-        print(all_pos_percent)
-
-        for idx, ids in enumerate(all_ids):
+            vote_count[video_id]["negative"] += 1
 
         pkl_out = open("stats.pickle", "wb")
         pkl.dump(vote_count, pkl_out)
         pkl_out.close()
 
-
-        return record + [sentiment]
+        return record+[sentiment]
 
 
 def send_rdd(rdd):
     records = rdd.collect()
     print("111111111111111111111")
+    pkl_in = open("stats.pickle", "rb")
+    vote_count = pkl.load(pkl_in)
 
+    global time_stamps, all_v_id, v_id_positive, v_id_neutral, v_id_negative
+    if len(time_stamps) == 0:
+        time_stamps.append(0)
+    else:
+        time_stamps.append(time_stamps[-1] + 1)
+
+    for v_id in vote_count.keys():
+        all_v_id.append(v_id)
+        if v_id not in v_id_positive:
+            v_id_positive[v_id] = []
+        v_id_positive[v_id].append(vote_count[v_id]["positive"])
+
+        if v_id not in v_id_neutral:
+            v_id_neutral[v_id] = []
+        v_id_neutral[v_id].append(vote_count[v_id]["neutral"])
+
+        if v_id not in v_id_negative:
+            v_id_negative[v_id] = []
+        v_id_negative[v_id].append(vote_count[v_id]["negative"])
+
+    # for v_id in vote_count.keys():
+    #     plt.subplot(5,2,v_id)
+    #     plt.bar()
+
+    print("vote_count: ", vote_count)
+    print("v_id_positive: ", v_id_positive)
+    print("v_id_neutral: ", v_id_neutral)
+    print("v_id_negative: ", v_id_negative)
+    print("\n")
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    for v_id_no, v_id in enumerate(vote_count.keys()):
+        # plt.subplot(5,2,v_id_no+1)
+        print(time_stamps)
+        print(v_id_positive[v_id])
+        plt.plot(time_stamps, v_id_positive[v_id])
+        plt.show()
+        break
+
+        # plt.plot(time_stamps, v_id_positive[v_id])
+
+    # plt.show()
+
+    print("2222222222222222222222")
     for record in records:
         record[1] = record[1].encode('utf-8')
         producer.send('sa', '\t'.join([str(e) for e in record]).encode('utf-8'))
 
 
 obj = CommentAnalysis()
-producer = KafkaProducer(bootstrap_servers='localhost:9092')
+
+# HERE CHANGE
+# producer = KafkaProducer(bootstrap_servers='localhost:9092')
+producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), bootstrap_servers='localhost:9092')
+
 context = SparkContext(appName='SentimentAnalysis')
 context.setLogLevel('WARN')
-streaming_context = StreamingContext(context, 5)
+streaming_context = StreamingContext(context, 10)
 
 kvs = KafkaUtils.createDirectStream(streaming_context, ['comments'], {
     'bootstrap.servers': 'localhost:9092',
@@ -111,4 +146,5 @@ print("**********************************************************************")
 sentiments.foreachRDD(send_rdd)
 
 streaming_context.start()
-streaming_context.awaitTermination()
+streaming_context.awaitTerminationOrTimeout(10000)
+streaming_context.stop(stopGraceFully=True)
