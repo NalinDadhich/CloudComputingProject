@@ -41,10 +41,24 @@ class CommentAnalysis:
         video_id = record[0]
 
         exists = os.path.isfile('stats.pickle')
-        if exists:
-            pkl_in = open("stats.pickle", "rb")
-            vote_count = pkl.load(pkl_in)
-            pkl_in.close()
+        
+        # if exists and os.path.getsize("stats.pickle") > 0:
+        #     pkl_in = open("stats.pickle", "rb")
+        #     vote_count = pkl.load(pkl_in)
+        #     pkl_in.close()
+        # else:
+        #     vote_count = OrderedDict()
+
+        if exists and os.path.getsize("stats.pickle") > 0: 
+                f =  open("stats.pickle", "rb")    
+                unpickler = pkl.Unpickler(f)
+                # if file is not empty scores will be equal
+                # to the value unpickled
+                try:
+                    vote_count = unpickler.load()
+                except:
+                    vote_count = OrderedDict()
+
         else:
             vote_count = OrderedDict()
 
@@ -105,10 +119,6 @@ def send_rdd(rdd):
     print("v_id_negative: ", v_id_negative)
     print("\n")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    a = [0,1,2]
-    b = [4, 5, 6]
-    plt.plot(a, b)
-    plt.show()
     # for v_id_no, v_id in enumerate(vote_count.keys()):
         # plt.subplot(5,2,v_id_no+1)
         # plt.plot(time_stamps, v_id_positive[v_id])
