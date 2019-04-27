@@ -11,6 +11,8 @@ from nltk.stem import PorterStemmer
 from nltk import WordNetLemmatizer
 from kafka import KafkaProducer
 from nltk.corpus import stopwords
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import json
 from collections import OrderedDict
@@ -103,13 +105,15 @@ def send_rdd(rdd):
     print("v_id_negative: ", v_id_negative)
     print("\n")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    for v_id_no, v_id in enumerate(vote_count.keys()):
+    a = [0,1,2]
+    b = [4, 5, 6]
+    plt.plot(a, b)
+    plt.show()
+    # for v_id_no, v_id in enumerate(vote_count.keys()):
         # plt.subplot(5,2,v_id_no+1)
-        print(time_stamps)
-        print(v_id_positive[v_id])
-        plt.plot(time_stamps, v_id_positive[v_id])
-        plt.show()
-        break
+        # plt.plot(time_stamps, v_id_positive[v_id])
+        # plt.show()
+        # break
 
         # plt.plot(time_stamps, v_id_positive[v_id])
 
