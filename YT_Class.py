@@ -92,7 +92,6 @@ class ExtractYouTube(Thread):
 
         for v_id in self.video_ids:
             json = self.get_all_comments(v_id)
-
             if json is None:
                 self.last_comment_per_video[v_id] = []
                 print('{} has no comments.'.format(v_id))

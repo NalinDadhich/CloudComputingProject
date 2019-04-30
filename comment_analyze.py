@@ -3,6 +3,7 @@ from pyspark.streaming import StreamingContext
 from pyspark import SparkContext
 from pyspark.streaming.kafka import KafkaUtils
 import os
+import csv
 import nltk
 import pickle as pkl
 import re
@@ -36,12 +37,13 @@ class CommentAnalysis:
         return self.sia.polarity_scores(text)
 
     def perform_sentiment_analysis(self, record):
-        # print(record)
+        print("111111111111111111111")
+        print(record)
         sentiment = self.find_sentiment(record[1])
         video_id = record[0]
 
         exists = os.path.isfile('stats.pickle')
-        
+
         # if exists and os.path.getsize("stats.pickle") > 0:
         #     pkl_in = open("stats.pickle", "rb")
         #     vote_count = pkl.load(pkl_in)
@@ -49,8 +51,8 @@ class CommentAnalysis:
         # else:
         #     vote_count = OrderedDict()
 
-        if exists and os.path.getsize("stats.pickle") > 0: 
-                f =  open("stats.pickle", "rb")    
+        if exists and os.path.getsize("stats.pickle") > 0:
+                f =  open("stats.pickle", "rb")
                 unpickler = pkl.Unpickler(f)
                 # if file is not empty scores will be equal
                 # to the value unpickled
@@ -69,11 +71,14 @@ class CommentAnalysis:
             vote_count[video_id]["negative"] = 0
 
         if sentiment['compound'] >= 0.05:
+            print("\nPOSITIVVVVEEEEEEEEEEEEE")
             vote_count[video_id]["positive"] += 1
 
         elif sentiment['compound'] >= -0.05:
+            print("\nNEUTRAALLLLLLLLLLLLL")
             vote_count[video_id]["neutral"] += 1
         else:
+            print("\nNEGATIIVVEEEEEEEEEEEEEEEE")
             vote_count[video_id]["negative"] += 1
 
         pkl_out = open("stats.pickle", "wb")
@@ -83,9 +88,32 @@ class CommentAnalysis:
         return record+[sentiment]
 
 
+def dump_csv(v_id_positive, v_id_neutral, v_id_negative):
+    with open('dict.csv', 'w') as csv_file:
+        writer = csv.writer(csv_file)
+
+        writer.writerow("\n")
+        writer.writerow(["Positive vote count: "])
+        for key, value in v_id_positive.items():
+            writer.writerow([key])
+            writer.writerow(value)
+
+        writer.writerow("\n")
+        writer.writerow(["Neutral vote count: "])
+        for key, value in v_id_neutral.items():
+            writer.writerow([key])
+            writer.writerow(value)
+
+        writer.writerow("\n")
+        writer.writerow(["Negative vote count: "])
+        for key, value in v_id_negative.items():
+            writer.writerow([key])
+            writer.writerow(value)
+
+
 def send_rdd(rdd):
     records = rdd.collect()
-    print("111111111111111111111")
+
     pkl_in = open("stats.pickle", "rb")
     vote_count = pkl.load(pkl_in)
 
@@ -117,7 +145,11 @@ def send_rdd(rdd):
     print("v_id_positive: ", v_id_positive)
     print("v_id_neutral: ", v_id_neutral)
     print("v_id_negative: ", v_id_negative)
+    print("time stamps: ", time_stamps)
     print("\n")
+
+    dump_csv(v_id_positive, v_id_neutral, v_id_negative)
+
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     # for v_id_no, v_id in enumerate(vote_count.keys()):
         # plt.subplot(5,2,v_id_no+1)
@@ -143,7 +175,7 @@ producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'
 
 context = SparkContext(appName='SentimentAnalysis')
 context.setLogLevel('WARN')
-streaming_context = StreamingContext(context, 10)
+streaming_context = StreamingContext(context, 15)
 
 kvs = KafkaUtils.createDirectStream(streaming_context, ['comments'], {
     'bootstrap.servers': 'localhost:9092',

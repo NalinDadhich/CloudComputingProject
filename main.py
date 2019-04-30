@@ -3,7 +3,7 @@ from server_create import Server
 from Consumer import Consumer
 
 producer = Producer(10, 'Movie Trailers',
-                    'AIzaSyC2xIrmR8u33LTINpCvpuLttNZJPuFEI0o')
+                    'AIzaSyAW4SYZW9AOchUBMeusAb3xEBw936sJcyc')
 producer.start()
 print("Producer has started!")
 
