@@ -37,7 +37,6 @@ class CommentAnalysis:
         return self.sia.polarity_scores(text)
 
     def perform_sentiment_analysis(self, record):
-        print("111111111111111111111")
         print(record)
         sentiment = self.find_sentiment(record[1])
         video_id = record[0]
