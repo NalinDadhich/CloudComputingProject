@@ -71,14 +71,11 @@ class CommentAnalysis:
             vote_count[video_id]["negative"] = 0
 
         if sentiment['compound'] >= 0.05:
-            print("\nPOSITIVVVVEEEEEEEEEEEEE")
             vote_count[video_id]["positive"] += 1
 
         elif sentiment['compound'] >= -0.05:
-            print("\nNEUTRAALLLLLLLLLLLLL")
             vote_count[video_id]["neutral"] += 1
         else:
-            print("\nNEGATIIVVEEEEEEEEEEEEEEEE")
             vote_count[video_id]["negative"] += 1
 
         pkl_out = open("stats.pickle", "wb")
@@ -141,13 +138,6 @@ def send_rdd(rdd):
     #     plt.subplot(5,2,v_id)
     #     plt.bar()
 
-    print("vote_count: ", vote_count)
-    print("v_id_positive: ", v_id_positive)
-    print("v_id_neutral: ", v_id_neutral)
-    print("v_id_negative: ", v_id_negative)
-    print("time stamps: ", time_stamps)
-    print("\n")
-
     dump_csv(v_id_positive, v_id_neutral, v_id_negative)
 
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -162,20 +152,20 @@ def send_rdd(rdd):
     # plt.show()
 
     print("2222222222222222222222")
-    for record in records:
-        record[1] = record[1].encode('utf-8')
-        producer.send('sa', '\t'.join([str(e) for e in record]).encode('utf-8'))
+    # for record in records:
+    #     record[1] = record[1].encode('utf-8')
+    #     producer.send('sa', '\t'.join([str(e) for e in record]).encode('utf-8'))
 
 
 obj = CommentAnalysis()
 
 # HERE CHANGE
 # producer = KafkaProducer(bootstrap_servers='localhost:9092')
-producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), bootstrap_servers='localhost:9092')
+# producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), bootstrap_servers='localhost:9092')
 
 context = SparkContext(appName='SentimentAnalysis')
 context.setLogLevel('WARN')
-streaming_context = StreamingContext(context, 15)
+streaming_context = StreamingContext(context, 60)
 
 kvs = KafkaUtils.createDirectStream(streaming_context, ['comments'], {
     'bootstrap.servers': 'localhost:9092',
