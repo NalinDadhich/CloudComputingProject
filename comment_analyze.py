@@ -134,35 +134,12 @@ def send_rdd(rdd):
             v_id_negative[v_id] = []
         v_id_negative[v_id].append(vote_count[v_id]["negative"])
 
-    # for v_id in vote_count.keys():
-    #     plt.subplot(5,2,v_id)
-    #     plt.bar()
-
     dump_csv(v_id_positive, v_id_neutral, v_id_negative)
-
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    # for v_id_no, v_id in enumerate(vote_count.keys()):
-        # plt.subplot(5,2,v_id_no+1)
-        # plt.plot(time_stamps, v_id_positive[v_id])
-        # plt.show()
-        # break
-
-        # plt.plot(time_stamps, v_id_positive[v_id])
-
-    # plt.show()
-
-    print("2222222222222222222222")
-    # for record in records:
-    #     record[1] = record[1].encode('utf-8')
-    #     producer.send('sa', '\t'.join([str(e) for e in record]).encode('utf-8'))
 
 
 obj = CommentAnalysis()
 
 # HERE CHANGE
-# producer = KafkaProducer(bootstrap_servers='localhost:9092')
-# producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), bootstrap_servers='localhost:9092')
-
 context = SparkContext(appName='SentimentAnalysis')
 context.setLogLevel('WARN')
 streaming_context = StreamingContext(context, 60)
