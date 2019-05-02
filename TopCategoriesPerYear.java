@@ -1,9 +1,5 @@
 import java.io.IOException;
-
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -11,11 +7,10 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.log4j.BasicConfigurator;
 
-public class TopCategoriesPerYear extends Configured implements Tool{
+public class TopCategoriesPerYear{
 
 	public static class Map extends Mapper<LongWritable, Text, Text, LongWritable> {
 		@Override
@@ -36,14 +31,13 @@ public class TopCategoriesPerYear extends Configured implements Tool{
 			long total = 0;
 
 			for(LongWritable value :values){
-				// context.write(key, value);
 				total += value.get();
 			}
 			context.write(key, new LongWritable(total));
 		}
 	}
 
-	public int run(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		Configuration conf= new Configuration();
 		
 
@@ -51,29 +45,22 @@ public class TopCategoriesPerYear extends Configured implements Tool{
 		
 		job.setJarByClass(TopCategoriesPerYear.class);
 		job.setMapperClass(Map.class);
-		// job.setReducerClass(Reduce.class);
+		job.setReducerClass(Reduce.class);
 		
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(LongWritable.class);
 		
-		// job.setInputFormatClass(Text.class);
-		// job.setOutputFormatClass(Text.class);
-	        
-	    FileInputFormat.addInputPath(job, new Path(args[0]));
-	    FileInputFormat.setInputDirRecursive(job, true);
-	    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+	    	FileInputFormat.setInputDirRecursive(job, true);
+	   	FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		System.out.println("See output in folder: " + args[1]);
+		
 		long startTime = System.currentTimeMillis();
 		boolean success = job.waitForCompletion(true);
 		System.out.println("Time elapsed (sec) = " + (System.currentTimeMillis() - startTime) / 1000.0);
-		return success ? 0 : 1;
 		
-	}
-
-	public static void main(String[] args) throws Exception {
-		TopCategoriesPerYear driver = new TopCategoriesPerYear();
-		int exitCode = ToolRunner.run(driver, args);
-		System.exit(exitCode);
+		System.exit(success ? 0 : 1);
+		
 	}
 	
 }
