@@ -18,8 +18,8 @@ public class TopCategoriesPerYear{
 			String line = value.toString();
 			String[] lineArr = line.split("\t");
 			String videoID = lineArr[0];
-			Long views = Long.parseLong(lineArr[1]);
-			context.write(new Text(videoID), new LongWritable(views));
+			Long likes = Long.parseLong(lineArr[2]);
+			context.write(new Text(videoID), new LongWritable(likes));
 		}
 	}
 	
@@ -41,7 +41,7 @@ public class TopCategoriesPerYear{
 		Configuration conf= new Configuration();
 		
 
-		Job job = new Job(conf,"TopViewed");
+		Job job = new Job(conf,"TopLiked");
 		
 		job.setJarByClass(TopCategoriesPerYear.class);
 		job.setMapperClass(Map.class);

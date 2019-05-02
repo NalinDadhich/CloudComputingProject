@@ -51,8 +51,8 @@ public class TopCategoriesPerYear{
 		job.setOutputValueClass(LongWritable.class);
 		
 		FileInputFormat.addInputPath(job, new Path(args[0]));
-	    	FileInputFormat.setInputDirRecursive(job, true);
-	   	FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		FileInputFormat.setInputDirRecursive(job, true);
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		System.out.println("See output in folder: " + args[1]);
 		
 		long startTime = System.currentTimeMillis();
