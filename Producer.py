@@ -8,10 +8,11 @@ class Producer:
     def __init__ (self, total_count, query, key):
         self.yt_class = ExtractYouTube(total_count, query, key,
                                        self.receive_comment)
-        self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
+        self.producer = KafkaProducer(bootstrap_servers='localhost:9092',
+                                      batch_size=8192)
 
     def receive_comment(self, v_id, comment):
-        self.producer.send('comments', bytes('{}\t{}'.format(v_id, comment),
+        self.producer.send('comments_1', bytes('{}\t{}'.format(v_id, comment),
                                              'utf-8'))
 
     def start(self):
