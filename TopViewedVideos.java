@@ -43,7 +43,7 @@ public class TopViewedVideos{
 
 		Job job = new Job(conf,"TopViewed");
 		
-		job.setJarByClass(TopCategoriesPerYear.class);
+		job.setJarByClass(TopViewedVideos.class);
 		job.setMapperClass(Map.class);
 		job.setReducerClass(Reduce.class);
 		
