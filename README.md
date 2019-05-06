@@ -26,7 +26,8 @@ In order to perform this combined analysis we try to achieve the following goals
 
 ### For Part 2
 1. Setup Zookeeper and Kafka servers on local machine. Instructions: https://kafka.apache.org/quickstart (Change any configuration from the files in config folder). 
-2. Enable Youtube API and paste the key in the code in order to enable it to extract the comments from the video.
-2. Start main.py (It is the main file that starts extracting the Youtube comments for the given query and starts the Kafka producer to inject into Spark stream) 
-3. Submit spark job comment_analyze.py. (Command: spark-submit --jars <*list of jars separated by comma*> comment_analyze.py) \
+2. Enable Youtube API and paste the key in the code (main.py) in order to enable it to extract the comments from the video.
+3. Specify the query and the total number of videos you want to query in main.py.
+4. Start main.py (It is the main file that starts extracting the Youtube comments for the given query and starts the Kafka producer to inject into Spark stream) 
+5. Submit spark job comment_analyze.py. (Command: spark-submit --jars <*list of jars separated by comma*> comment_analyze.py) \
     (This file contains code for creating Spark dstreams and comment analysis).
