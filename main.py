@@ -1,7 +1,7 @@
 from Producer import Producer
 
 producer = Producer(10, 'Movie trailers',
-                    'AIzaSyC2xIrmR8u33LTINpCvpuLttNZJPuFEI0o')
+                    'Enter your YouTube API key here')
 producer.start()
 print("Producer has started!")
 
