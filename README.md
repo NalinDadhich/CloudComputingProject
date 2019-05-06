@@ -1,9 +1,13 @@
 # CloudComputingProject
 # Exhaustive YouTube Video Analysis using Hadoop Mapreduce and Real-time Sentiment Analysis using Spark Streaming
 
-This project has two parts:
+This project has analyzes combines two different aspects of YouTube video analysis under a single ubmrella.
+1) Analyzing the video based on its likes/dislikes/view counts
+2) Analyzing the video based on the sentiment of its comments.
+
+In order to perform this combined analysis we try to achieve the following goals:
 1. Large scale analysis of Youtube videos, providing functionalities like top liked, top disliked, top viewed videos and top hot categories.
-2. Real time sentiment analysis of Youtube video comments.
+2. Real time sentiment analysis of Youtube video comments using Kafka.
 
 ## Guidelines to run the project:
 ### For Part 1
