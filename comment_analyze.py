@@ -12,6 +12,7 @@ from nltk.stem import PorterStemmer
 from nltk import WordNetLemmatizer
 from kafka import KafkaProducer
 from nltk.corpus import stopwords
+import time
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
@@ -24,6 +25,7 @@ v_id_positive = OrderedDict()
 v_id_neutral = OrderedDict()
 v_id_negative = OrderedDict()
 
+start_time = 0
 class CommentAnalysis:
     def __init__(self):
         self.stopwords = set(stopwords.words('english'))
@@ -37,10 +39,9 @@ class CommentAnalysis:
         return self.sia.polarity_scores(text)
 
     def perform_sentiment_analysis(self, record):
-        print(record)
+        # print(record)
         sentiment = self.find_sentiment(record[1])
         video_id = record[0]
-
         exists = os.path.isfile('stats.pickle')
 
         # if exists and os.path.getsize("stats.pickle") > 0:
@@ -60,15 +61,18 @@ class CommentAnalysis:
                 except:
                     vote_count = OrderedDict()
 
+
         else:
             vote_count = OrderedDict()
 
         if video_id not in vote_count:
             vote_count[video_id] = {}
+            vote_count["total_comments"] = 0
             vote_count[video_id]["positive"] = 0
             vote_count[video_id]["neutral"] = 0
             vote_count[video_id]["negative"] = 0
 
+        vote_count["total_comments"] = vote_count["total_comments"]+1
         if sentiment['compound'] >= 0.05:
             vote_count[video_id]["positive"] += 1
 
@@ -109,10 +113,16 @@ def dump_csv(v_id_positive, v_id_neutral, v_id_negative):
 
 def send_rdd(rdd):
     records = rdd.collect()
+    end_time = time.time()
 
     pkl_in = open("stats.pickle", "rb")
     vote_count = pkl.load(pkl_in)
 
+    end_time = time.time()
+    print("total_time: ", end_time - start_time)
+    print("total_comments: ", vote_count["total_comments"])
+    print("total comments per sec: ", vote_count["total_comments"]/(
+        end_time-start_time))
     global time_stamps, all_v_id, v_id_positive, v_id_neutral, v_id_negative
     if len(time_stamps) == 0:
         time_stamps.append(0)
@@ -120,6 +130,9 @@ def send_rdd(rdd):
         time_stamps.append(time_stamps[-1] + 1)
 
     for v_id in vote_count.keys():
+        if v_id == "total_comments":
+            continue
+
         all_v_id.append(v_id)
         if v_id not in v_id_positive:
             v_id_positive[v_id] = []
@@ -155,6 +168,7 @@ sentiments = comments.map(lambda record: obj.perform_sentiment_analysis(record))
 sentiments.pprint()
 print("**********************************************************************")
 # Send results through the producer
+start_time = time.time()
 sentiments.foreachRDD(send_rdd)
 
 streaming_context.start()
